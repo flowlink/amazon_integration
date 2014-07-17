@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe AmazonEndpoint do
+describe AmazonIntegration do
 
   let(:config) { [{ name: 'amazon.marketplace_id',     value: ENV['MARKETPLACE_ID'] },
                   { name: 'amazon.seller_id',          value: ENV['SELLER_ID'] },
@@ -291,4 +291,3 @@ describe AmazonEndpoint do
     end
   end
 end
-

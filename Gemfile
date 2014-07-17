@@ -1,3 +1,4 @@
+ruby '2.1.2'
 source 'https://rubygems.org'
 
 gem 'capistrano', '>= 3.0.0.pre13'
@@ -11,12 +12,9 @@ group :development do
 end
 
 group :development, :test do
+  gem 'dotenv'
   gem 'pry'
   gem 'pry-byebug'
-end
-
-group :test do
-  gem 'dotenv'
 end
 
 group :test do
@@ -35,5 +33,4 @@ group :production do
   gem 'unicorn'
 end
 
-gem 'endpoint_base', :git => 'git@github.com:spree/endpoint_base.git'
-gem 'capistrano-spree', :git => 'git@github.com:spree/capistrano-spree.git', :require => nil
+gem 'endpoint_base', github: 'spree/endpoint_base'
