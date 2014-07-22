@@ -19,8 +19,7 @@ describe Item do
     spree_sku.should eq '2001SSBL'
   end
 
-  describe '#unit_price' do
-    its(:unit_price) { should be 3.0 }
+  it '#unit_price' do
+    expect(subject.unit_price).to eq 3.0
   end
 end
-

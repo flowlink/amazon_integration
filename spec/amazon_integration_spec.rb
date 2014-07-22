@@ -19,7 +19,7 @@ describe AmazonIntegration do
   end
 
   def app
-    AmazonEndpoint
+    AmazonIntegration
   end
 
   describe '/get_orders' do

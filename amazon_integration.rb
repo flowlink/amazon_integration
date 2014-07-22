@@ -1,6 +1,9 @@
-Dir['./lib/**/*.rb'].each &method(:require)
+require "sinatra"
+require "endpoint_base"
 
-class AmazonEndpoint < EndpointBase
+require_all 'lib'
+
+class AmazonIntegration < EndpointBase::Sinatra::Base
   set :logging, true
 
   post '/get_orders' do
@@ -130,4 +133,3 @@ class AmazonEndpoint < EndpointBase
     [500, response]
   end
 end
-

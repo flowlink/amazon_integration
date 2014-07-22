@@ -4,7 +4,7 @@ require 'bundler'
 Bundler.require(:default, :test)
 Dotenv.load
 
-require File.join(File.dirname(__FILE__), '..', 'amazon_endpoint.rb')
+require File.join(File.dirname(__FILE__), '..', 'amazon_integration.rb')
 Dir["./spec/support/**/*.rb"].each {|f| require f}
 
 Sinatra::Base.environment = 'test'
@@ -24,4 +24,3 @@ RSpec.configure do |config|
 end
 
 ENV['ENDPOINT_KEY'] = 'x123'
-

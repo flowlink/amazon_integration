@@ -2,10 +2,13 @@ ruby '2.1.2'
 source 'https://rubygems.org'
 
 gem 'capistrano', '>= 3.0.0.pre13'
-gem 'ruby-mws'
 gem 'httparty'
-gem 'nokogiri'
 gem 'model_un'
+gem 'nokogiri'
+gem 'require_all'
+gem 'ruby-mws'
+gem 'sinatra'
+gem 'tilt-jbuilder'
 
 group :development do
   gem 'shotgun'
@@ -18,14 +21,14 @@ group :development, :test do
 end
 
 group :test do
-  gem 'vcr'
-  gem 'rspec'
-  gem 'webmock'
   gem 'guard-rspec'
-  gem 'terminal-notifier-guard'
-  gem 'rb-fsevent', '~> 0.9.1'
   gem 'rack-test'
+  gem 'rb-fsevent', '~> 0.9.1'
+  gem 'rspec', '~> 2.99'
+  gem 'terminal-notifier-guard'
   gem 'timecop'
+  gem 'vcr'
+  gem 'webmock'
 end
 
 group :production do
