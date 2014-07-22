@@ -22,5 +22,3 @@ RSpec.configure do |config|
   config.include Rack::Test::Methods
   config.include ApiHelper
 end
-
-ENV['ENDPOINT_KEY'] = 'x123'
