@@ -8,17 +8,14 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
   set :logging, true
 
   # NOTE: Can only be used in development this will break production if left in uncommented.
- configure :development do
-   enable :logging, :dump_errors, :raise_errors
-   log = File.new("tmp/sinatra.log", "a")
-   STDOUT.reopen(log)
-   STDERR.reopen(log)
- end
+  # configure :development do
+  #   enable :logging, :dump_errors, :raise_errors
+  #   log = File.new("tmp/sinatra.log", "a")
+  #   STDOUT.reopen(log)
+  #   STDERR.reopen(log)
+  # end
 
   before do
-    # log = File.new("tmp/sinatra.log", "a")
-    # STDOUT.reopen(log)
-    # STDERR.reopen(log)
     @mws = Mws.connect(
       merchant: @config['merchant_id'],
       access:   @config['aws_access_key_id'],
