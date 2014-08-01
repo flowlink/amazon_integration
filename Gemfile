@@ -4,11 +4,12 @@ source 'https://rubygems.org'
 gem 'capistrano', '>= 3.0.0.pre13'
 gem 'httparty'
 gem 'model_un'
+gem 'mws-connect' # Mws
 gem 'nokogiri'
+gem 'peddler' # MWS
 gem 'require_all'
-gem 'ruby-mws'
 gem 'sinatra'
-gem 'tilt-jbuilder'
+gem 'tilt-jbuilder', require: 'sinatra/jbuilder'
 
 group :development do
   gem 'shotgun'

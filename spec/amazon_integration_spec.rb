@@ -2,10 +2,10 @@ require 'spec_helper'
 
 describe AmazonIntegration do
 
-  let(:config) { [{ name: 'amazon.marketplace_id',     value: ENV['MARKETPLACE_ID'] },
-                  { name: 'amazon.seller_id',          value: ENV['SELLER_ID'] },
-                  { name: 'amazon.aws_access_key',     value: ENV['AWS_ACCESS_KEY'] },
-                  { name: 'amazon.secret_key',         value: ENV['SECRET_KEY'] },
+  let(:config) { [{ name: 'marketplace_id',     value: ENV['MARKETPLACE_ID'] },
+                  { name: 'merchant_id',        value: ENV['MERCHANT_ID'] },
+                  { name: 'aws_access_key_id',  value: ENV['AWS_ACCESS_KEY_ID'] },
+                  { name: 'secret_key',         value: ENV['SECRET_KEY'] },
                   { name: 'amazon.last_updated_after', value: '2013-06-12' }] }
 
   let(:message) { { message_id: '1234567' } }
@@ -106,41 +106,6 @@ describe AmazonIntegration do
       end
     end
 
-    context 'when throttled' do
-      it 'rescheduler the original message' do
-        AmazonFeed.any_instance.stub(:status).and_raise(Feeds::RequestThrottled)
-        Feeds::RequestThrottled.any_instance.stub(delay_in_seconds: 8.minutes)
-
-        request = { message_id: '1234', message: 'amazon:feed:status',
-                    payload: { feed_id: '8253017998', parameters: config } }
-
-        post '/feed_status', request.to_json, auth
-
-        expect(last_response).to be_ok
-        expect(json_response['message_id']).to eq('1234')
-        expect(json_response['delay']).to eq 8.minutes
-        expect(json_response).to_not have_key('messages')
-        expect(json_response).to_not have_key('notifications')
-      end
-    end
-
-    context 'when request quota exceeded' do
-      it 'rescheduler the original message' do
-        AmazonFeed.any_instance.stub(:status).and_raise(Feeds::QuotaExceeded)
-
-        request = { message_id: '1234', message: 'amazon:feed:status',
-                    payload: { feed_id: '8253017998', parameters: config } }
-
-        post '/feed_status', request.to_json, auth
-
-        expect(last_response).to be_ok
-        expect(json_response['message_id']).to eq('1234')
-        expect(json_response['delay']).to eq 20.minutes
-        expect(json_response).to_not have_key('messages')
-        expect(json_response).to_not have_key('notifications')
-      end
-    end
-
     context 'when errors' do
       before do
         now = Time.new(2013, 10, 23, 14, 44, 11, '-03:00')
@@ -203,39 +168,6 @@ describe AmazonIntegration do
         expect(json_response['messages'].first).to eq('message' => 'amazon:feed:status', 'payload' => { 'feed_id' => '8253017998' }, 'delay' => 2.minutes)
       end
     end
-
-    context 'when throttled' do
-      it 'rescheduler the original message' do
-        AmazonFeed.any_instance.stub(:submit).and_raise(Feeds::RequestThrottled)
-        Feeds::RequestThrottled.any_instance.stub(delay_in_seconds: 12.minutes)
-
-        request[:payload][:shipment] = Factories.shipment
-
-        post '/confirm_shipment', request.to_json, auth
-
-        expect(last_response).to be_ok
-        expect(json_response['message_id']).to eq('1234567')
-        expect(json_response['delay']).to eq 12.minutes
-        expect(json_response).to_not have_key('messages')
-        expect(json_response).to_not have_key('notifications')
-      end
-    end
-
-    context 'when quota exceeded' do
-      it 'rescheduler the original message' do
-        AmazonFeed.any_instance.stub(:submit).and_raise(Feeds::QuotaExceeded)
-
-        request[:payload][:shipment] = Factories.shipment
-
-        post '/confirm_shipment', request.to_json, auth
-
-        expect(last_response).to be_ok
-        expect(json_response['message_id']).to eq('1234567')
-        expect(json_response['delay']).to eq 20.minutes
-        expect(json_response).to_not have_key('messages')
-        expect(json_response).to_not have_key('notifications')
-      end
-    end
   end
 
   describe '/update_inventory_availabitity' do
@@ -254,39 +186,6 @@ describe AmazonIntegration do
         expect(json_response['message_id']).to eq('1234567')
         expect(json_response['messages']).to have(1).item
         expect(json_response['messages'].first).to eq('message' => 'amazon:feed:status', 'payload' => { 'feed_id' => '8259603164' }, 'delay' => 2.minutes)
-      end
-    end
-
-    context 'when quota exceeded' do
-      it 'rescheduler the original message' do
-        AmazonFeed.any_instance.stub(:submit).and_raise(Feeds::QuotaExceeded)
-
-        request[:payload].merge!(Factories.item)
-
-        post '/update_inventory_availabitity', request.to_json, auth
-
-        expect(last_response).to be_ok
-        expect(json_response['message_id']).to eq('1234567')
-        expect(json_response['delay']).to eq 20.minutes
-        expect(json_response).to_not have_key('messages')
-        expect(json_response).to_not have_key('notifications')
-      end
-    end
-
-    context 'when throttled' do
-      it 'rescheduler the original message' do
-        AmazonFeed.any_instance.stub(:submit).and_raise(Feeds::RequestThrottled)
-        Feeds::RequestThrottled.any_instance.stub(delay_in_seconds: 20.minutes)
-
-        request[:payload].merge!(Factories.item)
-
-        post '/update_inventory_availabitity', request.to_json, auth
-
-        expect(last_response).to be_ok
-        expect(json_response['message_id']).to eq('1234567')
-        expect(json_response['delay']).to eq 20.minutes
-        expect(json_response).to_not have_key('messages')
-        expect(json_response).to_not have_key('notifications')
       end
     end
   end

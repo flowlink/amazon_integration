@@ -4,6 +4,9 @@
 
 This is a fully hosted and supported integration for use with the [Wombat](http://wombat.co) product. With this integration you can perform the following functions:
 
+To debug feeds you can view results with the scratchpad:
+[https://mws.amazonservices.com/scratchpad/index.html](https://mws.amazonservices.com/scratchpad/index.html)
+
 ### Return Orders
 
 * Receives an amazon:order:poll message and looks for new orders in Amazon
@@ -20,8 +23,10 @@ The following parameters must be setup within [Wombat](http://wombat.co):
 
 | Name | Value |
 | :----| :-----|
-| username | Account username (required) |
-| password | Account password (required) |
+| merchant_id | Merchant ID (required) |
+| marketplace_id | Marketplace ID (required) |
+| access_key | Access Key (required) |
+| secret_key | Secret Key (required) |
 
 ## Webhooks
 
@@ -30,6 +35,8 @@ The following webhooks are implemented:
 | Name | Description |
 | :----| :-----------|
 | | |
+
+## Wombat
 
 [Wombat](http://wombat.co) allows you to connect to your own custom integrations.  Feel free to modify the source code and host your own version of the integration - or beter yet, help to make the official integration better by submitting a pull request!
 

@@ -1,14 +1,10 @@
 class AmazonClient
   def initialize(config, message)
-    host = config['amazon.services_host'].to_s.empty? ? 'mws.amazonservices.com' : config['amazon.services_host']
+    @client = MWS.new(aws_access_key_id: config['aws_access_key_id'],
+                      secret_access_key: config['secret_key'],
+                      seller_id:         config['merchant_id'],
+                      marketplace_id:    config['marketplace_id'])
 
-    @client = MWS.new(aws_access_key_id: config['amazon.aws_access_key'],
-                      secret_access_key: config['amazon.secret_key'],
-                      seller_id:         config['amazon.seller_id'],
-                      marketplace_id:    config['amazon.marketplace_id'],
-                      host:              host)
-
-    @last_updated = config['amazon.last_updated_after']
     @config = config
   end
 
@@ -72,4 +68,3 @@ class AmazonClient
     inventories.inventory_supply_list.to_a.map { |inventory| Inventory.new(inventory) }
   end
 end
-
