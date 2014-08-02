@@ -63,7 +63,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
   post '/get_orders' do
     begin
       # TODO remove pending
-      statuses = %w(PartiallyShipped Pending Unshipped)
+      statuses = %w(PartiallyShipped Unshipped)
       client = MWS::Orders.new(
         aws_access_key_id:     @config['aws_access_key_id'],
         aws_secret_access_key: @config['secret_key'],
@@ -73,7 +73,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
       amazon_response = client.list_orders(last_updated_after: @config['amazon_orders_last_polling_datetime'], order_status: statuses).parse
 
       collection = amazon_response['Orders']['Order'].is_a?(Array) ? amazon_response['Orders']['Order'] : [amazon_response['Orders']['Order']]
-      orders = collection.map { |order| Order.new(order, @config) }
+      orders = collection.map { |order| Order.new(order, client) }
 
       unless orders.empty?
         orders.each { |order| add_object :order, order.to_message }

@@ -12,13 +12,13 @@ class Order
                   :shipping_total,
                   :status
 
-  def initialize(order_hash, config)
+  def initialize(order_hash, client)
     puts "initialize: #{order_hash.inspect}"
+    @client             = client
     @line_items         = []
     @order_hash         = order_hash
-    # @config             = config
     @number             = order_hash['AmazonOrderId']
-    # @order_total        = order_hash['OrderTotal']['Amount']
+    @order_total        = order_hash['OrderTotal']['Amount'].to_f
     @last_update_date   = order_hash['LastUpdateDate']
     @status             = order_hash['OrderStatus']
     @shipping_total     = 0.00
@@ -34,7 +34,7 @@ class Order
     puts "#to_message: #{@order_hash.inspect} #{self.inspect}"
     roll_up_item_values
     items_hash       = assemble_line_items
-    # address_hash     = assemble_address
+    address_hash     = assemble_address
     totals_hash      = assemble_totals_hash
     adjustments_hash = assemble_adjustments_hash
     shipment_hash    = assemble_shipment_hash(items_hash)
@@ -43,7 +43,7 @@ class Order
       id: @number,
       number: @number,
       channel: @order_hash['SalesChannel'],
-      # currency: @order_hash['OrderTotal']['CurrencyCode'],
+      currency: @order_hash['OrderTotal']['CurrencyCode'],
       status: @order_hash['OrderStatus'],
       placed_on: @order_hash['PurchaseDate'],
       updated_at: @order_hash['LastUpdateDate'],
@@ -56,16 +56,18 @@ class Order
         payment_method: 'Amazon',
         status: 'complete'
       }],
-      shipments: shipment_hash#,
-      # shipping_address: address_hash,
-      # billing_address: address_hash
+      shipments: shipment_hash,
+      shipping_address: address_hash,
+      billing_address: address_hash
     }
   end
 
   private
 
   def assemble_line_items
-    @line_items.collect &:to_h
+    item_response = @client.list_order_items(@number).parse
+    collection = item_response['OrderItems']['OrderItem'].is_a?(Array) ? item_response['OrderItems']['OrderItem'] : [item_response['OrderItems']['OrderItem']]
+    @line_items = collection.map { |item| LineItem.new(item).to_h }
   end
 
   def assemble_address
@@ -80,7 +82,8 @@ class Order
     firstname, lastname = shipping_address_names
     address1,  address2 = shipping_addresses
 
-    { firstname:  firstname,
+    {
+      firstname:  firstname,
       lastname:   lastname,
       address1:   address1.to_s,
       address2:   address2.to_s,
@@ -88,7 +91,8 @@ class Order
       zipcode:    @order_hash['ShippingAddress']['PostalCode'],
       phone:      order_phone_number,
       country:    @order_hash['ShippingAddress']['CountryCode'],
-      state:      order_full_state }
+      state:      order_full_state
+    }
   end
 
   def shipping_address_names
@@ -131,12 +135,14 @@ class Order
   end
 
   def assemble_totals_hash
-    { item: @items_total,
+    {
+      item: @items_total,
       adjustment: @promotion_discount + @shipping_discount + @gift_wrap + @amazon_tax + @gift_wrap_tax,
       tax: @amazon_tax + @gift_wrap_tax,
       shipping: @shipping_total,
       order:  @order_total,
-      payment: @order_total }
+      payment: @order_total
+    }
   end
 
   def assemble_adjustments_hash
@@ -150,13 +156,15 @@ class Order
   end
 
   def assemble_shipment_hash(line_items)
-    [{ cost: @shipping_total,
-       status: @status,
-      #  shipping_method: order_shipping_method,
-       items: line_items,
-       stock_location: '',
-       tracking: '',
-       number: '' }]
+    [{
+      cost: @shipping_total,
+      status: @status,
+      shipping_method: order_shipping_method,
+      items: line_items,
+      stock_location: '',
+      tracking: '',
+      number: ''
+    }]
   end
 
   def order_shipping_method

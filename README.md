@@ -34,7 +34,9 @@ The following webhooks are implemented:
 
 | Name | Description |
 | :----| :-----------|
-| | |
+| /get_customers | Polls Amazon Webstore for Customers. NOTE: Only returns customer information for Webstores with Seller-Branded Checkout. |
+| /get_orders | Polls Amazon for Orders |
+| /set_inventory | Updates Inventory Quantity for a SKU |
 
 ## Wombat
 
@@ -42,4 +44,4 @@ The following webhooks are implemented:
 
 ![Wombat Logo](http://spreecommerce.com/images/wombat_logo.png)
 
-This integration is 100% open source an licensed under the terms of the New BSD License.
+This integration is 100% open source and licensed under the terms of the New BSD License.
