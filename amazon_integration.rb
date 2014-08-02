@@ -16,11 +16,13 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
   # end
 
   before do
-    @mws = Mws.connect(
-      merchant: @config['merchant_id'],
-      access:   @config['aws_access_key_id'],
-      secret:   @config['secret_key']
-    )
+    if @config
+      @mws = Mws.connect(
+        merchant: @config['merchant_id'],
+        access:   @config['aws_access_key_id'],
+        secret:   @config['secret_key']
+      )
+    end
   end
 
   post '/add_product' do
