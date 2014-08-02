@@ -31,7 +31,6 @@ class Order
   end
 
   def to_message
-    puts "#to_message: #{@order_hash.inspect} #{self.inspect}"
     roll_up_item_values
     items_hash       = assemble_line_items
     address_hash     = assemble_address
@@ -43,6 +42,7 @@ class Order
       id: @number,
       number: @number,
       channel: @order_hash['SalesChannel'],
+      fulfillment_channel: @order_hash['FulfillmentChannel'],
       currency: @order_hash['OrderTotal']['CurrencyCode'],
       status: @order_hash['OrderStatus'],
       placed_on: @order_hash['PurchaseDate'],
