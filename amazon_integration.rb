@@ -120,7 +120,11 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
 
   post '/update_shipment' do
     begin
-      raise 'TODO'
+      feed = AmazonFeed.new(@config)
+      order = Feeds::OrderFulfillment.new(@payload['shipment'], @config['merchant_id'])
+
+      id = feed.submit(order.feed_type, order.to_xml)
+      response = "Submited Feed: feed id - #{id}"
       code = 200
     rescue => e
       code, response = handle_error(e)
