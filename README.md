@@ -2,20 +2,10 @@
 
 ## Overview
 
-This is a fully hosted and supported integration for use with the [Wombat](http://wombat.co) product. With this integration you can perform the following functions:
+This is a fully hosted and supported integration for use with the [Wombat](http://wombat.co) product.
 
 To debug feeds you can view results with the scratchpad:
 [https://mws.amazonservices.com/scratchpad/index.html](https://mws.amazonservices.com/scratchpad/index.html)
-
-### Return Orders
-
-* Receives an amazon:order:poll message and looks for new orders in Amazon
-* Returns orders to be imported into Spree
-
-### Return Specific Order
-
-* Receives an amazon:import:by_number message and looks for a specific order in Amazon
-* Returns a specific order from Amazon filtered by `amazon_order_id` to be imported into Spree
 
 ## Connection Parameters
 
@@ -37,6 +27,7 @@ The following webhooks are implemented:
 | /get_customers | Polls Amazon Webstore for Customers. NOTE: Only returns customer information for Webstores with Seller-Branded Checkout. |
 | /get_orders | Polls Amazon for Orders |
 | /set_inventory | Updates Inventory Quantity for a SKU |
+| /update_shipment | Updates the corresponding Amazon order with shipping info |
 
 ## Wombat
 

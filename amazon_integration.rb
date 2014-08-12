@@ -37,7 +37,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
 
   post '/get_customers' do
     begin
-      client = MWS::CustomerInformation.new(
+      client = MWS.customer_information(
         aws_access_key_id:     @config['aws_access_key_id'],
         aws_secret_access_key: @config['secret_key'],
         marketplace_id:        @config['marketplace_id'],
@@ -45,8 +45,12 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
       )
       amazon_response = client.list_customers(last_updated_after: @config['amazon_customers_last_polling_datetime']).parse
 
-      collection = amazon_response['Customers']['Customer'].is_a?(Array) ? amazon_response['Customers']['Customer'] : [amazon_response['Customers']['Customer']]
-      customers = collection.map { |customer| Customer.new(customer) }
+      customers = if amazon_response['Customers']
+        collection = amazon_response['Customers']['Customer'].is_a?(Array) ? amazon_response['Customers']['Customer'] : [amazon_response['Customers']['Customer']]
+        collection.map { |customer| Customer.new(customer) }
+      else
+        []
+      end
 
       unless customers.empty?
         customers.each { |customer| add_object :customer, customer.to_message }
@@ -66,7 +70,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
     begin
       # TODO remove pending
       statuses = %w(PartiallyShipped Unshipped)
-      client = MWS::Orders.new(
+      client = MWS.orders(
         aws_access_key_id:     @config['aws_access_key_id'],
         aws_secret_access_key: @config['secret_key'],
         marketplace_id:        @config['marketplace_id'],
@@ -74,8 +78,12 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
       )
       amazon_response = client.list_orders(last_updated_after: @config['amazon_orders_last_polling_datetime'], order_status: statuses).parse
 
-      collection = amazon_response['Orders']['Order'].is_a?(Array) ? amazon_response['Orders']['Order'] : [amazon_response['Orders']['Order']]
-      orders = collection.map { |order| Order.new(order, client) }
+      orders = if amazon_response['Orders']
+        collection = amazon_response['Orders']['Order'].is_a?(Array) ? amazon_response['Orders']['Order'] : [amazon_response['Orders']['Order']]
+        collection.map { |order| Order.new(order, client) }
+      else
+        []
+      end
 
       unless orders.empty?
         orders.each { |order| add_object :order, order.to_message }
