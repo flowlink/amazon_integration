@@ -43,10 +43,10 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
         marketplace_id:        @config['marketplace_id'],
         merchant_id:           @config['merchant_id']
       )
-      amazon_response = client.list_customers(last_updated_after: @config['amazon_customers_last_polling_datetime']).parse
+      amazon_response = client.list_customers(date_range_start: @config['amazon_customers_last_polling_datetime'], date_range_type: 'LastUpdatedDate').parse
 
-      customers = if amazon_response['Customers']
-        collection = amazon_response['Customers']['Customer'].is_a?(Array) ? amazon_response['Customers']['Customer'] : [amazon_response['Customers']['Customer']]
+      customers = if amazon_response['CustomerList']
+        collection = amazon_response['CustomerList']['Customer'].is_a?(Array) ? amazon_response['CustomerList']['Customer'] : [amazon_response['CustomerList']['Customer']]
         collection.map { |customer| Customer.new(customer) }
       else
         []
@@ -54,7 +54,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
 
       unless customers.empty?
         customers.each { |customer| add_object :customer, customer.to_message }
-        add_parameter 'amazon_customers_last_polling_datetime', customers.last.last_update_date
+        add_parameter 'amazon_customers_last_polling_datetime', customers.last.last_updated_on
       end
 
       code     = 200
