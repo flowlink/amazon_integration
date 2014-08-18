@@ -24,7 +24,7 @@ module Feeds
               xml.MerchantFulfillmentID @shipment['order_id'].gsub(/\D/, '')
               xml.FulfillmentDate Time.now.strftime('%Y-%m-%dT%H:%M:%S')
               xml.FulfillmentData  {
-                xml.CarrierName @shipment['carrier_name']
+                xml.CarrierName @shipment['shipping_carrier']
                 xml.ShippingMethod @shipment['shipping_method']
                 xml.ShipperTrackingNumber @shipment['tracking']
               }
