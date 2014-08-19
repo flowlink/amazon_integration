@@ -43,7 +43,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
         marketplace_id:        @config['marketplace_id'],
         merchant_id:           @config['merchant_id']
       )
-      amazon_response = client.list_customers(date_range_start: Time.parse(@config['amazon_customers_last_polling_datetime']).iso8601, date_range_type: 'LastUpdatedDate').parse
+      amazon_response = client.list_customers(date_range_start: Time.parse(@config['amazon_customers_last_polling_datetime']).iso8601.to_s, date_range_type: 'LastUpdatedDate').parse
 
       customers = if amazon_response['CustomerList']
         collection = amazon_response['CustomerList']['Customer'].is_a?(Array) ? amazon_response['CustomerList']['Customer'] : [amazon_response['CustomerList']['Customer']]
@@ -80,7 +80,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
         marketplace_id:        @config['marketplace_id'],
         merchant_id:           @config['merchant_id']
       )
-      amazon_response = client.list_orders(last_updated_after: Time.parse(@config['amazon_orders_last_polling_datetime']).iso8601, order_status: statuses).parse
+      amazon_response = client.list_orders(last_updated_after: Time.parse(@config['amazon_orders_last_polling_datetime']).iso8601.to_s, order_status: statuses).parse
 
       orders = if amazon_response['Orders']
         collection = amazon_response['Orders']['Order'].is_a?(Array) ? amazon_response['Orders']['Order'] : [amazon_response['Orders']['Order']]
