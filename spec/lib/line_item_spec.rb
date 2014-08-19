@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Item do
+describe LineItem do
 
   let(:order) { Factories.orders.first }
 

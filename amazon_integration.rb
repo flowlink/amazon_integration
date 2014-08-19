@@ -54,7 +54,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
 
       unless customers.empty?
         customers.each { |customer| add_object :customer, customer.to_message }
-        add_parameter 'amazon_customers_last_polling_datetime', customers.last.last_updated_on
+        add_parameter 'amazon_customers_last_polling_datetime', Time.now.utc.iso8601
       end
 
       code     = 200
@@ -91,7 +91,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
 
       unless orders.empty?
         orders.each { |order| add_object :order, order.to_message }
-        add_parameter 'amazon_orders_last_polling_datetime', orders.last.last_update_date
+        add_parameter 'amazon_orders_last_polling_datetime', Time.now.utc.iso8601
       end
 
       code     = 200

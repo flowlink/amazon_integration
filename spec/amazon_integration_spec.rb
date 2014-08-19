@@ -89,6 +89,7 @@ describe AmazonIntegration do
 
   describe '/feed_status' do
     before do
+      pending 'might not need anymore'
       now = Time.new(2013, 10, 22, 21, 39, 01, '-04:00')
       Time.stub(now: now)
     end
