@@ -58,7 +58,11 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
       end
 
       code     = 200
-      response = "Successfully received #{customers.size} customer(s) from Amazon MWS."
+      response = if customers.size > 0
+        "Successfully received #{customers.size} customer(s) from Amazon MWS."
+      else
+        nil
+      end
     rescue => e
       code, response = handle_error(e)
     end
@@ -91,7 +95,11 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
       end
 
       code     = 200
-      response = "Successfully received #{orders.size} order(s) from Amazon MWS."
+      response = if orders.size > 0
+        "Successfully received #{orders.size} order(s) from Amazon MWS."
+      else
+        nil
+      end
     rescue => e
       code, response = handle_error(e)
     end
