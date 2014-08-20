@@ -232,7 +232,11 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
   end
 
   def handle_error(e)
-    response = [e.message, e.backtrace.to_a].flatten.join('\n\t')
+    response = if e.message =~ /403 Forbidden/
+      "403 Forbidden.  Please ensure your connection credentials are correct.  If using /get_customers webhook ensure you've enabled the Customer Information API. For further help read: https://support.wombat.co/hc/en-us/articles/203066480"
+    else
+      [e.message, e.backtrace.to_a].flatten.join('\n\t')
+    end
     [500, response]
   end
 
