@@ -171,26 +171,19 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
       secret: @config['secret_key']
     )
 
+    # Assign vars outside Mws::Product block as @payload can't be accessed in it.
+    brand_name = @payload['product']['properties']['brand']
+    sku = @payload['product']['sku']
     title = @payload['product']['name']
+    desc = @payload['product']['description']
+    upc_code = @payload['product']['properties']['upc_code']
 
     product = Mws::Product(@payload['product']['sku']) {
-      upc @payload['product']['properties']['upc']
-      # tax_code 'GEN_TAX_CODE'
-      # tax_code 'A_GEN_TAX'
-      # brand 'Some Brand'
-      # msrp 19.99, 'USD'
-      # manufacturer 'Some Manufacturer'
+      brand brand_name
+      description desc
+      tax_code 'GEN_TAX_CODE'
+      upc upc_code
       name title
-
-      # description "This 6' HDMI cable supports signals up to 1080p and most screen refresh rates to ensure stunning image clarity with reduced motion blur in fast-action scenes."
-      # bullet_point 'Compatible with HDMI components'
-      # msrp 495.99, :usd
-      # category :ce
-      # details {
-      #   cable_or_adapter {
-      #     cable_length as_distance 6, :feet
-      #   }
-      # }
     }
 
     product_feed = mws.feeds.products.add(product)
@@ -225,7 +218,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
     #
     # workflow.proceed
 
-    [200, "Submitted SKU #{@payload['product']['sku']} with MWS Feed ID: #{product_feed.id}"]
+    [200, "Submitted SKU #{sku} with MWS Feed ID: #{product_feed.id}"]
   end
 
   def handle_error(e)
