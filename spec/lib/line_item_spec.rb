@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe LineItem do
 
-  let(:order) { Factories.orders.first }
+  let(:order) { Factories.orders(double(MWS)).first }
 
   subject { order.line_items.first }
 
@@ -13,6 +13,6 @@ describe LineItem do
   end
 
   it '#unit_price' do
-    expect(subject.unit_price).to eq 3.0
+    expect(subject.send(:unit_price)).to eq 3.0
   end
 end
