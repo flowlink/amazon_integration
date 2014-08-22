@@ -54,8 +54,9 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
 
       unless customers.empty?
         customers.each { |customer| add_object :customer, customer.to_message }
+        # We want to set the time to be right after the last received so convert to unix stamp to increment and convert back to iso8601.
+        add_parameter 'amazon_customers_last_polling_datetime', Time.at(Time.parse(customers.last.last_updated_on).to_i + 1).utc.iso8601
       end
-      add_parameter 'amazon_customers_last_polling_datetime', Time.now.utc.iso8601
 
       code     = 200
       response = if customers.size > 0
@@ -91,8 +92,9 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
 
       unless orders.empty?
         orders.each { |order| add_object :order, order.to_message }
+        # We want to set the time to be right after the last received so convert to unix stamp to increment and convert back to iso8601.
+        add_parameter 'amazon_orders_last_polling_datetime', Time.at(Time.parse(orders.last.last_update_date).to_i + 1).utc.iso8601
       end
-      add_parameter 'amazon_orders_last_polling_datetime', Time.now.utc.iso8601
 
       code     = 200
       response = if orders.size > 0
@@ -172,28 +174,23 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
     title = @payload['product']['name']
 
     product = Mws::Product(@payload['product']['sku']) {
-      # upc '123435566654'
+      upc @payload['product']['properties']['upc']
       # tax_code 'GEN_TAX_CODE'
-      # name 'Some Product 123'
+      # tax_code 'A_GEN_TAX'
       # brand 'Some Brand'
       # msrp 19.99, 'USD'
       # manufacturer 'Some Manufacturer'
-      upc '847651325546'
-      tax_code 'A_GEN_TAX'
-      # name "Spree T-Shirt"
       name title
 
-      # name "Rocketfish 6' In-Wall HDMI Cable"
-      # brand "Rocketfish"
       # description "This 6' HDMI cable supports signals up to 1080p and most screen refresh rates to ensure stunning image clarity with reduced motion blur in fast-action scenes."
       # bullet_point 'Compatible with HDMI components'
       # msrp 495.99, :usd
-      category :ce
-      details {
-        cable_or_adapter {
-          cable_length as_distance 6, :feet
-        }
-      }
+      # category :ce
+      # details {
+      #   cable_or_adapter {
+      #     cable_length as_distance 6, :feet
+      #   }
+      # }
     }
 
     product_feed = mws.feeds.products.add(product)

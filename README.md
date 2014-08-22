@@ -24,9 +24,11 @@ The following webhooks are implemented:
 
 | Name | Description |
 | :----| :-----------|
+| /add_product | Adds existing products within Amazon's catalog to your account |
 | /get_customers | Polls Amazon Webstore for Customers. NOTE: Only returns customer information for Webstores with Seller-Branded Checkout. |
 | /get_orders | Polls Amazon for Orders |
 | /set_inventory | Updates Inventory Quantity for a SKU |
+| /update_product | Updates the corresponding Amazon product |
 | /update_shipment | Updates the corresponding Amazon order with shipping info |
 
 ## Wombat
