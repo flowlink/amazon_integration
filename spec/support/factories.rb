@@ -1,12 +1,46 @@
 module Factories
   class << self
 
+    def customers
+      [Customer.new(customer_responses[0])]
+    end
+
     def orders(client)
       order1 = Order.new(order_responses[0], client)
       order2 = Order.new(order_responses[1], client)
       order1.line_items << LineItem.new(item_responses[0])
       order2.line_items << LineItem.new(item_responses[1])
       [order1, order2]
+    end
+
+    def customer_responses
+      [
+        {
+          'CustomerId' => 'CID',
+          'PrimaryContactInfo' => {
+            'Email' => 'spree@example.com',
+            'FullName' => 'First Middle Last'
+          },
+          'ShippingAddressList' => {
+            'ShippingAddress' => {
+              'IsDefaultAddress' => 'true',
+              'FullName' => 'First Middle Last',
+              'AddressLine1' => '1 address line',
+              'AddressLine2' => '2 address lines',
+              'PostalCode' => 'zip',
+              'City' => 'city',
+              'CountryCode' => 'US',
+              'StateOrRegion' => 'VT',
+              'Phone' => '555-555-5555'
+            }
+          },
+          'AssociatedMarketplaces' => {
+            'MarketplaceDomain' => {
+              'DomainName' => 'www.example.com'
+            }
+          }
+        },
+      ]
     end
 
     def order_responses
