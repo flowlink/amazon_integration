@@ -9,6 +9,7 @@ class Order
                   :number,
                   :order_hash,
                   :promotion_discount,
+                  :shipping_address,
                   :shipping_discount,
                   :shipping_total,
                   :status
@@ -22,6 +23,7 @@ class Order
     @order_total         = order_hash['OrderTotal']['Amount'].to_f
     @last_update_date    = order_hash['LastUpdateDate']
     @status              = order_hash['OrderStatus']
+    @shipping_address    = assemble_address
     @shipping_total      = 0.00
     @shipping_discount   = 0.00
     @promotion_discount  = 0.00
@@ -39,7 +41,6 @@ class Order
   def to_message
     roll_up_item_values
     items_hash       = assemble_line_items
-    address_hash     = assemble_address
     totals_hash      = assemble_totals_hash
     adjustments_hash = assemble_adjustments_hash
 
@@ -61,8 +62,9 @@ class Order
         payment_method: 'Amazon',
         status: 'complete'
       }],
-      shipping_address: address_hash,
-      billing_address: address_hash,
+      shipping_address: @shipping_address,
+      # TODO: Should we even return the billing address?  We are only given a shipping address.
+      billing_address: @shipping_address,
       amazon_shipping_method: order_shipping_method
     }
   end
@@ -74,10 +76,12 @@ class Order
       order_id: @number,
       cost: @shipping_total,
       status: @status,
+      shipping_address: @shipping_address,
       shipping_method: order_shipping_method,
       items: @line_items,
       stock_location: '',
       tracking: '',
+      amazon_shipping_method: order_shipping_method,
       fulfillment_channel: @fulfillment_channel
     }
   end
