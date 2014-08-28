@@ -28,12 +28,12 @@ class LineItem
 
   def to_h
     {
-      name:     @name,
-      price:    @unit_price,
-      sku:      @sku,
-      quantity: @quantity,
-      asin:     @asin,
-      options:  {}
+      name:       @name,
+      price:      @unit_price,
+      product_id: @sku,
+      quantity:   @quantity,
+      asin:       @asin,
+      options:    {}
     }
   end
 

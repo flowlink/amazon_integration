@@ -1,5 +1,6 @@
 class Order
   attr_accessor :amazon_tax,
+                  :fulfillment_channel,
                   :gift_wrap,
                   :gift_wrap_tax,
                   :items_total,
@@ -14,20 +15,25 @@ class Order
 
   def initialize(order_hash, client)
     puts "initialize: #{order_hash.inspect}"
-    @client             = client
-    @line_items         = []
-    @order_hash         = order_hash
-    @number             = order_hash['AmazonOrderId']
-    @order_total        = order_hash['OrderTotal']['Amount'].to_f
-    @last_update_date   = order_hash['LastUpdateDate']
-    @status             = order_hash['OrderStatus']
-    @shipping_total     = 0.00
-    @shipping_discount  = 0.00
-    @promotion_discount = 0.00
-    @amazon_tax         = 0.00
-    @gift_wrap          = 0.00
-    @gift_wrap_tax      = 0.00
-    @items_total        = 0.00
+    @client              = client
+    @line_items          = []
+    @order_hash          = order_hash
+    @number              = order_hash['AmazonOrderId']
+    @order_total         = order_hash['OrderTotal']['Amount'].to_f
+    @last_update_date    = order_hash['LastUpdateDate']
+    @status              = order_hash['OrderStatus']
+    @shipping_total      = 0.00
+    @shipping_discount   = 0.00
+    @promotion_discount  = 0.00
+    @amazon_tax          = 0.00
+    @gift_wrap           = 0.00
+    @gift_wrap_tax       = 0.00
+    @items_total         = 0.00
+    @fulfillment_channel = order_hash['FulfillmentChannel']
+  end
+
+  def fulfilled_by_amazon?
+    order_hash['FulfillmentChannel'] != 'MFN'
   end
 
   def to_message
@@ -36,13 +42,12 @@ class Order
     address_hash     = assemble_address
     totals_hash      = assemble_totals_hash
     adjustments_hash = assemble_adjustments_hash
-    shipment_hash    = assemble_shipment_hash(items_hash)
 
     {
       id: @number,
       number: @number,
       channel: @order_hash['SalesChannel'],
-      fulfillment_channel: @order_hash['FulfillmentChannel'],
+      fulfillment_channel: @fulfillment_channel,
       currency: @order_hash['OrderTotal']['CurrencyCode'],
       status: @order_hash['OrderStatus'],
       placed_on: @order_hash['PurchaseDate'],
@@ -56,9 +61,24 @@ class Order
         payment_method: 'Amazon',
         status: 'complete'
       }],
-      shipments: shipment_hash,
       shipping_address: address_hash,
-      billing_address: address_hash
+      billing_address: address_hash,
+      amazon_shipping_method: order_shipping_method
+    }
+  end
+
+  def to_shipment
+    {
+      id: @number,
+      number: @number,
+      order_id: @number,
+      cost: @shipping_total,
+      status: @status,
+      shipping_method: order_shipping_method,
+      items: @line_items,
+      stock_location: '',
+      tracking: '',
+      fulfillment_channel: @fulfillment_channel
     }
   end
 
@@ -145,18 +165,6 @@ class Order
       { name: 'Gift Wrap Price',    value: @gift_wrap },
       { name: 'Gift Wrap Tax',      value: @gift_wrap_tax }
    ]
-  end
-
-  def assemble_shipment_hash(line_items)
-    [{
-      cost: @shipping_total,
-      status: @status,
-      shipping_method: order_shipping_method,
-      items: line_items,
-      stock_location: '',
-      tracking: '',
-      number: ''
-    }]
   end
 
   def order_shipping_method

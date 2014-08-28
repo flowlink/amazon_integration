@@ -91,14 +91,21 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
       end
 
       unless orders.empty?
-        orders.each { |order| add_object :order, order.to_message }
+        shipment_count = 0
+        orders.each do |order|
+          add_object :order, order.to_message
+          if !order.fulfilled_by_amazon?
+            add_object :shipment, order.to_shipment
+            shipment_count += 1
+          end
+        end
         # We want to set the time to be right after the last received so convert to unix stamp to increment and convert back to iso8601.
         add_parameter 'amazon_orders_last_polling_datetime', Time.at(Time.parse(orders.last.last_update_date).to_i + 1).utc.iso8601
       end
 
       code     = 200
       response = if orders.size > 0
-        "Successfully received #{orders.size} order(s) from Amazon MWS."
+        "Successfully received #{orders.size} order(s) and #{shipment_count} shipment(s) from Amazon MWS."
       else
         nil
       end
@@ -185,47 +192,22 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
       upc upc_code
       name title
     }
-
     product_feed = mws.feeds.products.add(product)
-    # workflow.register product_feed.id do
-    #   price_feed = mws.feeds.prices.add(
-    #     Mws::PriceListing('2634897', 495.99)#.on_sale(29.99, Time.now, 3.months.from_now)
-    #   )
-    #   image_feed = mws.feeds.images.add(
-    #     Mws::ImageListing('2634897', 'http://images.bestbuy.com/BestBuy_US/images/products/2634/2634897_sa.jpg', 'Main'),
-    #     Mws::ImageListing('2634897', 'http://images.bestbuy.com/BestBuy_US/images/products/2634/2634897cv1a.jpg', 'PT1')
-    #   )
-    #   shipping_feed = mws.feeds.shipping.add(
-    #     Mws::Shipping('2634897') {
-    #       restricted :alaska_hawaii, :standard, :po_box
-    #       adjust 4.99, :usd, :continental_us, :standard
-    #       replace 11.99, :usd, :continental_us, :expedited, :street
-    #     }
-    #   )
-    #   workflow.register price_feed.id, image_feed.id, shipping_feed.id do
-    #     inventory_feed = mws.feeds.inventory.add(
-    #       Mws::Inventory('2634897', quantity: 10, fulfillment_type: :mfn)
-    #     )
-    #     workflow.register inventory_feed.id do
-    #       puts 'The workflow is complete!'
-    #     end
-    #     inventory_feed.id
-    #   end
-    #   [ price_feed.id, image_feed.id, shipping_feed.id ]
-    #  end
-    #   product_feed.id
-    # end
-    #
-    # workflow.proceed
 
-    [200, "Submitted SKU #{sku} with MWS Feed ID: #{product_feed.id}"]
+    if @payload['product']['price']
+      price_feed = mws.feeds.prices.update(
+        Mws::PriceListing(sku, @payload['product']['price'])
+      )
+    end
+
+    [200, "Submitted SKU #{sku} with MWS Feed IDs: Product #{product_feed.id}, Price #{price_feed ? price_feed.id : 'not submitted'}."]
   end
 
   def handle_error(e)
     response = if e.message =~ /403 Forbidden/
       "403 Forbidden.  Please ensure your connection credentials are correct.  If using /get_customers webhook ensure you've enabled the Customer Information API. For further help read: https://support.wombat.co/hc/en-us/articles/203066480"
     else
-      [e.message, e.backtrace.to_a].flatten.join('\n\t')
+      "Error processing request: #{e.message}"
     end
     [500, response]
   end
