@@ -207,7 +207,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
     response = if e.message =~ /403 Forbidden/
       "403 Forbidden.  Please ensure your connection credentials are correct.  If using /get_customers webhook ensure you've enabled the Customer Information API. For further help read: https://support.wombat.co/hc/en-us/articles/203066480"
     else
-      "Error processing request: #{e.message}"
+      "Error processing request: #{e.message}.  Please contact support if this error persists."
     end
     [500, response]
   end
