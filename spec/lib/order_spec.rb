@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Order do
-  subject { Factories.orders(double(MWS, list_order_items: double('item', parse: { 'OrderItems' =>  { 'OrderItem' => [] } }))).first }
+  subject { Factories.orders(double(MWS, list_order_items: double('item', parse: { 'OrderItems' =>  { 'OrderItem' => [] } })), double(Redis, get: nil)).first }
 
   before do
     skip

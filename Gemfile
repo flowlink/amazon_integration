@@ -2,11 +2,14 @@ ruby '2.1.2'
 source 'https://rubygems.org'
 
 gem 'capistrano', '>= 3.0.0.pre13'
+gem 'geokit'
+gem 'honeybadger'
 gem 'httparty'
 gem 'model_un'
 gem 'mws-connect' # Mws
 gem 'nokogiri'
 gem 'peddler' # MWS
+gem 'redis'
 gem 'require_all'
 gem 'sinatra'
 gem 'tilt-jbuilder', require: 'sinatra/jbuilder'

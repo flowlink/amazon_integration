@@ -14,9 +14,9 @@ class Order
                   :shipping_total,
                   :status
 
-  def initialize(order_hash, client)
-    puts "initialize: #{order_hash.inspect}"
+  def initialize(order_hash, client, redis)
     @client              = client
+    @redis               = redis
     @line_items          = []
     @order_hash          = order_hash
     @number              = order_hash['AmazonOrderId']
@@ -192,11 +192,27 @@ class Order
   end
 
   def convert_us_state_name(state_abbr)
+    # Manual exceptions can be done here.
     exceptions = { 'AA'   => 'U.S. Armed Forces – Americas',
                    'AE'   => 'U.S. Armed Forces – Europe',
                    'AP'   => 'U.S. Armed Forces – Pacific',
                    'D.C.' => 'District Of Columbia' }
 
-    exceptions[state_abbr] || ModelUN.convert_state_abbr(state_abbr)
+    # Amazon allows users to input whatever state they want so we need to sanity check here.
+    # We will look up the state by postal code from Google API and convert to full state name.
+    # Then we cache in redis to prevent API throttling.
+    # See: https://sellercentral.amazon.com/forums/message.jspa?messageID=2483353
+    state_by_postal_code = @redis.get("zip-#{@order_hash['ShippingAddress']['PostalCode']}")
+    if state_by_postal_code.nil?
+      Geokit::Geocoders::GoogleGeocoder.api_key = ENV['GOOGLE_GEOCODE_API_KEY']
+      result = Geokit::Geocoders::GoogleGeocoder.geocode(@order_hash['ShippingAddress']['PostalCode'])
+      state_by_postal_code = if result.is_us?
+        ModelUN.convert_state_abbr(result.state)
+      else
+        result.state
+      end
+    end
+
+    exceptions[state_abbr.upcase] || state_by_postal_code || ModelUN.convert_state_abbr(state_abbr.upcase)
   end
 end

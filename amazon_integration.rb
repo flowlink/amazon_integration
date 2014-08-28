@@ -7,6 +7,11 @@ require_all 'lib'
 class AmazonIntegration < EndpointBase::Sinatra::Base
   set :logging, true
 
+  Honeybadger.configure do |config|
+    config.api_key = ENV['HONEYBADGER_KEY']
+    config.environment_name = ENV['RACK_ENV']
+  end
+
   # NOTE: Can only be used in development this will break production if left in uncommented.
   # configure :development do
   #   enable :logging, :dump_errors, :raise_errors
@@ -73,7 +78,9 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
 
   post '/get_orders' do
     begin
-      # TODO remove pending
+      uri   = URI.parse(ENV["REDIS_HOST"] || "redis://localhost:6379")
+      redis = Redis.new(host: uri.host, port: uri.port, password: uri.password)
+
       statuses = %w(PartiallyShipped Unshipped)
       client = MWS.orders(
         aws_access_key_id:     @config['aws_access_key_id'],
@@ -85,7 +92,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
 
       orders = if amazon_response['Orders']
         collection = amazon_response['Orders']['Order'].is_a?(Array) ? amazon_response['Orders']['Order'] : [amazon_response['Orders']['Order']]
-        collection.map { |order| Order.new(order, client) }
+        collection.map { |order| Order.new(order, client, redis) }
       else
         []
       end
@@ -113,6 +120,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
       code, response = handle_error(e)
     end
 
+    redis.quit
     result code, response
   end
 

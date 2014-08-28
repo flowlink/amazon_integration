@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe LineItem do
 
-  let(:order) { Factories.orders(double(MWS)).first }
+  let(:order) { Factories.orders(double(MWS), double(Redis, get: nil)).first }
 
   subject { order.line_items.first }
 

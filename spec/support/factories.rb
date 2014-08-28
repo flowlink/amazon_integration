@@ -5,9 +5,9 @@ module Factories
       [Customer.new(customer_responses[0])]
     end
 
-    def orders(client)
-      order1 = Order.new(order_responses[0], client)
-      order2 = Order.new(order_responses[1], client)
+    def orders(client, redis)
+      order1 = Order.new(order_responses[0], client, redis)
+      order2 = Order.new(order_responses[1], client, redis)
       order1.line_items << LineItem.new(item_responses[0])
       order2.line_items << LineItem.new(item_responses[1])
       [order1, order2]
