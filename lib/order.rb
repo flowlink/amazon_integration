@@ -204,15 +204,21 @@ class Order
     # See: https://sellercentral.amazon.com/forums/message.jspa?messageID=2483353
     state_by_postal_code = @redis.get("zip-#{@order_hash['ShippingAddress']['PostalCode']}")
     if state_by_postal_code.nil?
-      Geokit::Geocoders::GoogleGeocoder.api_key = ENV['GOOGLE_GEOCODE_API_KEY']
-      result = Geokit::Geocoders::GoogleGeocoder.geocode(@order_hash['ShippingAddress']['PostalCode'])
-      state_by_postal_code = if result.is_us?
-        ModelUN.convert_state_abbr(result.state)
-      else
-        result.state
+      begin
+        Geokit::Geocoders::GoogleGeocoder.api_key = ENV['GOOGLE_GEOCODE_API_KEY']
+        result = Geokit::Geocoders::GoogleGeocoder.geocode(@order_hash['ShippingAddress']['PostalCode'])
+        state_by_postal_code = if result.is_us?
+          ModelUN.convert_state_abbr(result.state).split.map(&:capitalize).join(' ')
+        else
+          result.state
+        end
+        @redis.set("zip-#{@order_hash['ShippingAddress']['PostalCode']}", state_by_postal_code) unless state_by_postal_code.nil?
+      rescue
+        state_by_postal_code ||= ModelUN.convert_state_abbr(state_abbr.upcase).split.map(&:capitalize).join(' ')
       end
     end
 
-    exceptions[state_abbr.upcase] || state_by_postal_code || ModelUN.convert_state_abbr(state_abbr.upcase)
+    exceptions[state_abbr.upcase] || state_by_postal_code
   end
+
 end
