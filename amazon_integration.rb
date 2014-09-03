@@ -154,7 +154,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
   post '/update_shipment' do
     begin
       feed = AmazonFeed.new(@config)
-      order = Feeds::OrderFulfillment.new(@payload['shipment'], @config['merchant_id'])
+      order = Feeds::OrderFulfillment.new(@payload['shipment'], @config)
 
       id = feed.submit(order.feed_type, order.to_xml)
       response = "Submited Feed: feed id - #{id}"
@@ -214,6 +214,8 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
   def handle_error(e)
     response = if e.message =~ /403 Forbidden/
       "403 Forbidden.  Please ensure your connection credentials are correct.  If using /get_customers webhook ensure you've enabled the Customer Information API. For further help read: https://support.wombat.co/hc/en-us/articles/203066480"
+    elsif e.message =~ /Access denied/
+      "Access denied.  Please ensure your connection credentials are correct."
     else
       "Error processing request: #{e.message}.  Please contact support if this error persists."
     end
