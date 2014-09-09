@@ -81,7 +81,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
       uri   = URI.parse(ENV["REDIS_HOST"] || "redis://localhost:6379")
       redis = Redis.new(host: uri.host, port: uri.port, password: uri.password)
 
-      statuses = %w(PartiallyShipped Unshipped)
+      statuses = %w(PartiallyShipped Unshipped Shipped Canceled Unfulfillable)
       client = MWS.orders(
         aws_access_key_id:     @config['aws_access_key_id'],
         aws_secret_access_key: @config['secret_key'],
