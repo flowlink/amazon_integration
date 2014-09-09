@@ -101,7 +101,7 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
         shipment_count = 0
         orders.each do |order|
           add_object :order, order.to_message
-          if !order.fulfilled_by_amazon?
+          if !order.fulfilled_by_amazon? && @config['create_shipments'] == '1'
             add_object :shipment, order.to_shipment
             shipment_count += 1
           end

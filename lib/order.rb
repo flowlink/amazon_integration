@@ -41,7 +41,6 @@ class Order
   def to_message
     roll_up_item_values
     items_hash       = assemble_line_items
-    totals_hash      = assemble_totals_hash
     adjustments_hash = assemble_adjustments_hash
 
     {
@@ -54,7 +53,7 @@ class Order
       placed_on: @order_hash['PurchaseDate'],
       updated_at: @order_hash['LastUpdateDate'],
       email: @order_hash['BuyerEmail'],
-      totals: totals_hash,
+      totals: assemble_totals_hash,
       adjustments: adjustments_hash,
       line_items: items_hash,
       payments: [{
@@ -75,7 +74,9 @@ class Order
       number: @number,
       order_id: @number,
       cost: @shipping_total,
+      totals: assemble_totals_hash,
       status: @status,
+      billing_address: @shipping_address,
       shipping_address: @shipping_address,
       shipping_method: order_shipping_method,
       items: @line_items,
