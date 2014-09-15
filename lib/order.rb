@@ -73,6 +73,7 @@ class Order
       id: @number,
       number: @number,
       order_id: @number,
+      channel: @order_hash['SalesChannel'],
       cost: @shipping_total,
       totals: assemble_totals_hash,
       status: @status,
