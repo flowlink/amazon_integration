@@ -20,7 +20,7 @@ class Order
     @line_items          = []
     @order_hash          = order_hash
     @number              = order_hash['AmazonOrderId']
-    @order_total         = order_hash['OrderTotal']['Amount'].to_f
+    @order_total         = order_hash['OrderTotal'].to_h['Amount'].to_f
     @last_update_date    = order_hash['LastUpdateDate']
     @status              = order_hash['OrderStatus']
     @shipping_address    = assemble_address
@@ -48,7 +48,7 @@ class Order
       number: @number,
       channel: @order_hash['SalesChannel'],
       fulfillment_channel: @fulfillment_channel,
-      currency: @order_hash['OrderTotal']['CurrencyCode'],
+      currency: @order_hash['OrderTotal'].to_h['CurrencyCode'],
       status: @order_hash['OrderStatus'],
       placed_on: @order_hash['PurchaseDate'],
       updated_at: @order_hash['LastUpdateDate'],
@@ -105,7 +105,7 @@ class Order
     #   "address1": null
     #
     # @order_hash['buyer_name'].to_s buyer_name can be nil as well
-    firstname, lastname = Customer.names @order_hash['ShippingAddress']['Name']
+    firstname, lastname = Customer.names @order_hash['ShippingAddress'].to_h['Name']
     address1,  address2 = shipping_addresses
 
     {
@@ -113,10 +113,10 @@ class Order
       lastname:   lastname,
       address1:   address1.to_s,
       address2:   address2.to_s,
-      city:       @order_hash['ShippingAddress']['City'],
-      zipcode:    @order_hash['ShippingAddress']['PostalCode'],
+      city:       @order_hash['ShippingAddress'].to_h['City'],
+      zipcode:    @order_hash['ShippingAddress'].to_h['PostalCode'],
       phone:      order_phone_number,
-      country:    @order_hash['ShippingAddress']['CountryCode'],
+      country:    @order_hash['ShippingAddress'].to_h['CountryCode'],
       state:      order_full_state
     }
   end
@@ -124,16 +124,16 @@ class Order
   def shipping_addresses
     # Promotes address2 to address1 when address1 is absent.
     [
-      @order_hash['ShippingAddress']['AddressLine1'],
-      @order_hash['ShippingAddress']['AddressLine2'],
-      @order_hash['ShippingAddress']['AddressLine3']
+      @order_hash['ShippingAddress'].to_h['AddressLine1'],
+      @order_hash['ShippingAddress'].to_h['AddressLine2'],
+      @order_hash['ShippingAddress'].to_h['AddressLine3']
     ].
     compact.
     reject { |address| address.empty? }
   end
 
   def order_phone_number
-    phone_number = @order_hash['ShippingAddress']['Phone'].to_s.strip
+    phone_number = @order_hash['ShippingAddress'].to_h['Phone'].to_s.strip
     if phone_number.empty?
       return '000-000-0000'
     end
@@ -186,8 +186,8 @@ class Order
   # end
 
   def order_full_state
-    state  = @order_hash['ShippingAddress']['StateOrRegion'].to_s
-    if @order_hash['ShippingAddress']['CountryCode'].to_s.upcase != 'US'
+    state  = @order_hash['ShippingAddress'].to_h['StateOrRegion'].to_s
+    if @order_hash['ShippingAddress'].to_h['CountryCode'].to_s.upcase != 'US'
       return state
     end
     convert_us_state_name(state)
