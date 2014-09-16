@@ -81,8 +81,6 @@ class Order
       shipping_address: @shipping_address,
       shipping_method: order_shipping_method,
       items: @line_items,
-      stock_location: '',
-      tracking: '',
       amazon_shipping_method: order_shipping_method,
       fulfillment_channel: @fulfillment_channel
     }
