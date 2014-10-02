@@ -39,9 +39,8 @@ class Order
   end
 
   def to_message
+    assemble_line_items
     roll_up_item_values
-    items_hash       = assemble_line_items
-    adjustments_hash = assemble_adjustments_hash
 
     {
       id: @number,
@@ -54,8 +53,8 @@ class Order
       updated_at: @order_hash['LastUpdateDate'],
       email: @order_hash['BuyerEmail'],
       totals: assemble_totals_hash,
-      adjustments: adjustments_hash,
-      line_items: items_hash,
+      adjustments: assemble_adjustments_hash,
+      line_items: @line_items.map { |item| item.to_h },
       payments: [{
         amount: @order_total,
         payment_method: 'Amazon',
@@ -80,7 +79,7 @@ class Order
       billing_address: @shipping_address,
       shipping_address: @shipping_address,
       shipping_method: order_shipping_method,
-      items: @line_items,
+      items: @line_items.map { |item| item.to_h },
       amazon_shipping_method: order_shipping_method,
       fulfillment_channel: @fulfillment_channel
     }
@@ -91,7 +90,7 @@ class Order
   def assemble_line_items
     item_response = @client.list_order_items(@number).parse
     collection = item_response['OrderItems']['OrderItem'].is_a?(Array) ? item_response['OrderItems']['OrderItem'] : [item_response['OrderItems']['OrderItem']]
-    @line_items = collection.map { |item| LineItem.new(item).to_h }
+    @line_items = collection.map { |item| LineItem.new(item) }
   end
 
   def assemble_address
