@@ -82,13 +82,15 @@ class AmazonIntegration < EndpointBase::Sinatra::Base
       redis = Redis.new(host: uri.host, port: uri.port, password: uri.password)
 
       statuses = %w(PartiallyShipped Unshipped Shipped Canceled Unfulfillable)
+
       client = MWS.orders(
         aws_access_key_id:     @config['aws_access_key_id'],
         aws_secret_access_key: @config['secret_key'],
         marketplace_id:        @config['marketplace_id'],
         merchant_id:           @config['merchant_id']
       )
-      amazon_response = client.list_orders(last_updated_after: Time.parse(@config['amazon_orders_last_polling_datetime']).iso8601.to_s, order_status: statuses).parse
+
+      amazon_response = client.list_orders(last_updated_after: Time.parse(@config['amazon_orders_last_polling_datetime']).iso8601.to_s, order_status: statuses, max_results_per_page: 50).parse
 
       orders = if amazon_response['Orders']
         collection = amazon_response['Orders']['Order'].is_a?(Array) ? amazon_response['Orders']['Order'] : [amazon_response['Orders']['Order']]
