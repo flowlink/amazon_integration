@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a fully hosted and supported integration for use with the [Wombat](http://wombat.co) product.
+This is a fully hosted and supported integration for use with the [FlowLink](http://flowlink.io/) product.
 
 To debug feeds you can view results with the scratchpad:
 [https://mws.amazonservices.com/scratchpad/index.html](https://mws.amazonservices.com/scratchpad/index.html)
