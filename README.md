@@ -9,7 +9,7 @@ To debug feeds you can view results with the scratchpad:
 
 ## Connection Parameters
 
-The following parameters must be setup within [Wombat](http://wombat.co):
+The following parameters must be setup within [FlowLink](http://flowlink.io/):
 
 | Name | Value |
 | :----| :-----|
@@ -31,10 +31,12 @@ The following webhooks are implemented:
 | /update_product | Updates the corresponding Amazon product |
 | /update_shipment | Updates the corresponding Amazon order with shipping info |
 
-## Wombat
+# About FlowLink
 
-[Wombat](http://wombat.co) allows you to connect to your own custom integrations.  Feel free to modify the source code and host your own version of the integration - or beter yet, help to make the official integration better by submitting a pull request!
+[FlowLink](http://flowlink.io/) allows you to connect to your own custom integrations.
+Feel free to modify the source code and host your own version of the integration
+or better yet, help to make the official integration better by submitting a pull request!
 
-![Wombat Logo](http://spreecommerce.com/images/wombat_logo.png)
+This integration is 100% open source an licensed under the terms of the New BSD License.
 
-This integration is 100% open source and licensed under the terms of the New BSD License.
+![FlowLink Logo](http://flowlink.io/wp-content/uploads/logo-1.png)
